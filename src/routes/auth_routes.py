@@ -7,7 +7,6 @@ auth_bp = Blueprint('auth', __name__)
 
 # Ruta para el registro de usuarios nuevos.
 @auth_bp.route('/register', methods=['POST'])
-@jwt_required()
 def register():
     data = request.get_json()
 
