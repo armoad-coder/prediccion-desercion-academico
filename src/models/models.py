@@ -6,6 +6,8 @@ class Student(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255), nullable=False)
+    apellido = db.Column(db.String(255), nullable=False)
+    cedula = db.Column(db.String(50), unique=True, nullable=False)
 
     subjects = db.relationship(
         "StudentSubject",
@@ -17,6 +19,8 @@ class Student(db.Model):
         return {
             "id": self.id,
             "nombre": self.nombre,
+            "apellido": self.apellido,
+            "cedula": self.cedula,
             "materias": {
                 ss.subject.nombre: ss.nota
                 for ss in self.subjects
