@@ -10,6 +10,12 @@ venv/
 .env
 *.env
 
+.venv
+*.venv
+
+.venv_3.12
+*.venv_3.12
+
 # Logs
 *.log
 

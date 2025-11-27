@@ -13,7 +13,7 @@ Uso desde Python:
     from predictor import predecir_por_cedula
     resultado = predecir_por_cedula("5123456")
 """
-
+print("HOLA MUNDO")
 import sys
 import os
 import json
@@ -25,7 +25,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
 from app import create_app
 from extensions import db
 from models.models import Student, Subject, StudentSubject
-
+from services.predictor_service import FEATURES_EN_ORDEN
 import joblib
 import numpy as np
 import pandas as pd
@@ -35,7 +35,7 @@ from datetime import datetime
 # CONFIG
 # -----------------------
 CAREER = "Informatica"  # carrera por defecto
-MODEL_NAME_VISIBLE = "K-Nearest Neighbors"  # nombre visible
+MODEL_NAME_VISIBLE = "Regresión Logística"  # nombre visible
 MODEL_MAPPING = {
     "Regresión Logística": "regresion_logistica",
     "Árbol de Decisiones": "decision_tree",
@@ -54,8 +54,8 @@ NORMAL_CAREER = normalized_career(CAREER)
 SCALER_FILENAME = f"scaler_{NORMAL_CAREER}.joblib"
 MODEL_FILENAME = f"{NORMAL_CAREER}/modelo_{MODEL_MAPPING[MODEL_NAME_VISIBLE]}_alumnos_{NORMAL_CAREER}.joblib"
 
-# Orden EXACTO de materias (53)
-MATERIAS_EN_ORDEN: List[str] = [
+# Orden EXACTO de materias (55)
+MATERIAS_EN_ORDEN_CSV = [
 "ADMINISTRACION Y MERCADOTECNIA",
 "BASES DE DATOS I",
 "BASES DE DATOS II",
@@ -93,7 +93,7 @@ MATERIAS_EN_ORDEN: List[str] = [
 "INVESTIGACION DE OPERACIONES I",
 "LABORATORIO DE IDIOMAS I",
 "LABORATORIO I",
-"LENGUAJE DE PROGRAMACION  I",
+"LENGUAJE DE PROGRAMACION I",
 "LENGUAJE DE PROGRAMACION II",
 "LENGUAJE DE PROGRAMACION IV",
 "LENGUAJES DE PROGRAMACION III",
@@ -112,6 +112,16 @@ MATERIAS_EN_ORDEN: List[str] = [
 "ALGEBRA II",
 "ETICA PROFESIONAL"
 ]
+
+FEATURES_EN_ORDEN = [
+    "Sexo",
+    "Estado_Carrera",
+    "TiempoEstudio",
+    "Ausencias",
+    "CincoF",
+    "aplazos",
+    "Promedio",
+] + MATERIAS_EN_ORDEN_CSV
 
 # -----------------------
 # UTIL
@@ -132,7 +142,6 @@ def load_model(path: str = MODEL_FILENAME):
     if not os.path.isfile(path):
         raise FileNotFoundError(f"Modelo file no encontrado: {path}")
     return joblib.load(path)
-
 # -----------------------
 # CONVERSIÓN AL VECTOR DEL MODELO
 # -----------------------
@@ -164,7 +173,7 @@ def build_feature_vector(student: Student) -> List[float]:
     materias_dict = { ss.subject.nombre: ss.nota for ss in student.subjects }
 
     # Asegurar el orden exacto de las materias
-    for materia in MATERIAS_EN_ORDEN:
+    for materia in MATERIAS_EN_ORDEN_CSV:
         nota = materias_dict.get(materia)
         if nota is None:
             # si falta la materia, asumimos 0 (o podrías lanzar error)
@@ -203,11 +212,13 @@ def predecir_por_cedula(cedula: str, career: str = CAREER, model_visible_name: s
     model = load_model(model_path)
 
     # Convertir a DataFrame/np.array para aplicar scaler
-    X = np.array(vector).reshape(1, -1)
+    #X = np.array(vector).reshape(1, -1)
+    X_df = pd.DataFrame([vector], columns=FEATURES_EN_ORDEN)
+    X_scaled = scaler.transform(X_df)
     if not hasattr(scaler, "mean_"):
         raise ValueError("Scaler cargado no parece estar ajustado (faltan atributos como mean_).")
 
-    X_scaled = scaler.transform(X)
+    #X_scaled = scaler.transform(X)
 
     # Predecir
     if hasattr(model, "predict_proba"):
@@ -217,7 +228,6 @@ def predecir_por_cedula(cedula: str, career: str = CAREER, model_visible_name: s
         probabilities = None
 
     prediction_raw = model.predict(X_scaled)[0]
-
     # Construir output
     result: Dict[str, Any] = {
         "timestamp": datetime.utcnow().isoformat() + "Z",
@@ -226,7 +236,7 @@ def predecir_por_cedula(cedula: str, career: str = CAREER, model_visible_name: s
         "prediccion_raw": int(prediction_raw) if isinstance(prediction_raw, (int, np.integer)) else str(prediction_raw),
         "prediccion_descripcion": human_state(int(prediction_raw)) if isinstance(prediction_raw, (int, np.integer)) else "Desconocido",
     }
-
+    print(result)
     if probabilities is not None:
         # Mapear probabilidades a los labels del modelo (model.classes_)
         # Para obtener clases necesitamos inspeccionar model.classes_
@@ -245,7 +255,6 @@ def predecir_por_cedula(cedula: str, career: str = CAREER, model_visible_name: s
 
         else:
             result["probabilidades"] = [float(round(float(p), 6)) for p in probabilities]
-
     return result
 
 # -----------------------
