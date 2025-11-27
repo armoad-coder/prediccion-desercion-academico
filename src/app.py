@@ -20,9 +20,13 @@ def create_app():
     # Importar y registrar las rutas
     from routes.main_routes import main_bp
     from routes.auth_routes import auth_bp
+    from routes.predict_routes import predict_bp
+    from routes.student_routes import student_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
+    app.register_blueprint(predict_bp)
+    app.register_blueprint(student_bp)
 
     # Para migraciones
     Migrate(app, db)
