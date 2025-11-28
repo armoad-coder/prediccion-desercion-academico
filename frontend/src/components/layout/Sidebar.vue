@@ -1,6 +1,7 @@
 <template>
-  <aside class="w-64 bg-[#41403b] text-white h-screen shadow-xl flex flex-col select-none">
-
+  <aside
+    class="w-64 bg-[#41403b] text-white h-screen sticky top-0 shadow-xl flex flex-col select-none"
+  >
     <!-- LOGO / TÍTULO -->
     <div class="p-4 text-center border-b border-gray-600">
       <h1 class="text-xl font-bold">FCT – UNCA</h1>
@@ -9,7 +10,6 @@
     <!-- MENU -->
     <nav class="flex-1 overflow-y-auto">
       <ul class="mt-4">
-
         <!-- INICIO -->
         <li>
           <router-link
@@ -52,8 +52,11 @@
               stroke-width="2"
               viewBox="0 0 24 24"
             >
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M9 5l7 7-7 7" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
 
@@ -93,10 +96,8 @@
             </ul>
           </transition>
         </li>
-
       </ul>
     </nav>
-
   </aside>
 </template>
 
