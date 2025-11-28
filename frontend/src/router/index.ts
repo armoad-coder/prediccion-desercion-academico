@@ -5,7 +5,6 @@ import LoginView from "@/views/LoginView.vue";
 import { useUserStore } from "@/stores/userStore";
 import NotFound from "@/views/NotFound.vue";
 
-
 const routes = [
   {
     path: "/",
@@ -24,13 +23,19 @@ const routes = [
       {
         path: "home",
         component: HomeView,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true },
       },
       {
         path: "/Dashboard",
         name: "Dashboard",
         component: () => import("@/views/Dashboard.vue"),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true },
+      },
+      {
+        path: "/Bulk_csv",
+        name: "Bulk",
+        component: () => import("@/views/BulkView.vue"),
+        meta: { requiresAuth: true },
       },
     ],
   },
@@ -38,8 +43,8 @@ const routes = [
   {
     path: "/:pathMatch(.*)*",
     name: "NotFound",
-    component: NotFound
-  }
+    component: NotFound,
+  },
 ];
 
 const router = createRouter({
